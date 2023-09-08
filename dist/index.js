@@ -2777,7 +2777,6 @@ async function run() {
     }
 }
 exports.run = run;
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
 run();
 
 
