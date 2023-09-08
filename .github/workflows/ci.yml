@@ -48,8 +48,9 @@ jobs:
             - name: Test Local Action
               id: test-action
               uses: ./
-              with:
-                  milliseconds: 1000
+              env:
+                  JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+                  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
             - name: Print Output
               id: output
