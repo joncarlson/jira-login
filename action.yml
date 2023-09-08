@@ -1,19 +1,17 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'JIRA Server Login'
+description: 'Logs a user in to a JIRA Server instance'
+author: 'Jon Carlson'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
-    required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+    JIRA_BASE_URL:
+        description: 'The JIRA base URL (ex. https://mydomainhostingjira.com)'
+        required: true
+    
+    JIRA_API_TOKEN:
+        description: 'A personal API token, generated from your JIRA user profile'
+        required: true
 
 runs:
-  using: node16
-  main: dist/index.js
+    using: node16
+    main: dist/index.js

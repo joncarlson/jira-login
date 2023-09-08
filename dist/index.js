@@ -2753,22 +2753,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(186));
-const wait_1 = __nccwpck_require__(259);
-/**
- * The main function for the action.
- * @returns {Promise<void>} Resolves when the action is complete.
- */
 async function run() {
     try {
-        const ms = core.getInput('milliseconds');
-        // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-        core.debug(`Waiting ${ms} milliseconds ...`);
-        // Log the current timestamp, wait, then log the new timestamp
-        core.debug(new Date().toTimeString());
-        await (0, wait_1.wait)(parseInt(ms, 10));
-        core.debug(new Date().toTimeString());
-        // Set outputs for other workflow steps to use
-        core.setOutput('time', new Date().toTimeString());
+        const baseUrl = process.env.JIRA_BASE_URL || core.getInput('JIRA_BASE_URL');
+        const token = process.env.JIRA_API_TOKEN || core.getInput('JIRA_API_TOKEN');
+        if (!baseUrl)
+            throw new Error('JIRA_BASE_URL is not defined');
+        if (!token)
+            throw new Error('JIRA_API_TOKEN is not defined');
+        // verify login using JIRA
+        const user = await getJiraUser({ baseUrl, token });
+        core.debug(user);
+        core.notice('Logged in successfully');
     }
     catch (error) {
         // Fail the workflow run if an error occurs
@@ -2777,32 +2773,21 @@ async function run() {
     }
 }
 exports.run = run;
-run();
-
-
-/***/ }),
-
-/***/ 259:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = void 0;
-/**
- * Wait for a number of milliseconds.
- * @param milliseconds The number of milliseconds to wait.
- * @returns {Promise<string>} Resolves with 'done!' after the wait is over.
- */
-async function wait(milliseconds) {
-    return new Promise(resolve => {
-        if (isNaN(milliseconds)) {
-            throw new Error('milliseconds not a number');
+async function getJiraUser(config) {
+    const getMyselfUrl = `${config.baseUrl}/rest/api/2/myself`;
+    core.debug(`Getting the user using the provided token from: ${getMyselfUrl}`);
+    let response = await fetch(getMyselfUrl, {
+        headers: {
+            Authorization: `Bearer ${config.token}`
         }
-        setTimeout(() => resolve('done!'), milliseconds);
     });
+    if (!response.ok) {
+        core.debug(response.toString());
+        throw new Error('Failed to login to JIRA');
+    }
+    return await response.json();
 }
-exports.wait = wait;
+run();
 
 
 /***/ }),
